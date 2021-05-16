@@ -2,7 +2,8 @@ from telegram.ext import Updater, CommandHandler
 # Телеграм-бот который повторяет все что ему отправили
 
 def greet_user(update, context):
-    print("Здарова!")
+    print("Запущен /start")
+    update.message.reply_text('Здарова!')
 
 
 def main():
