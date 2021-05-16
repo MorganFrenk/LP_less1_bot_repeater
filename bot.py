@@ -1,5 +1,9 @@
-from telegram.ext import Updater, CommandHandler
+import logging
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+
 # Телеграм-бот который повторяет все что ему отправили
+
+logging.basicConfig(filename='bot.log', level=logging.INFO)
 
 def greet_user(update, context):
     print("Запущен /start")
@@ -14,7 +18,7 @@ def main():
     dp = mybot.dispatcher
     dp.add_handler(CommandHandler('start', greet_user))
 
-
+    logging.info('Бот стартовал')
     # Начинаю отправку запросов
     mybot.start_polling()
     
