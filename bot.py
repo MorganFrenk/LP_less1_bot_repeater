@@ -37,4 +37,5 @@ def main():
     # Запускаю бесконечную отправку запросов
     mybot.idle()
 
-main()
+if __name__ == "__main__":
+    main()
