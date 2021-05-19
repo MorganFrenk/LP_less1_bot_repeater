@@ -1,6 +1,7 @@
 import logging
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 import settings
+import ephem
 
 # Телеграм-бот который повторяет все что ему отправили
 
@@ -10,8 +11,12 @@ def greet_user(update, context):
     logging.info('Команда /start активирована')
 
     start_reply = 'Здарова!'
-    update.message.reply_text(start_reply)
+    update.message.reply_text(start_reply) 
     logging.info('Ответ бота на /start: ' + start_reply)
+
+def show_star(update, context):
+    logging.info('Команда /planet активирована')
+    planet = update.message.text.split()
 
 def talk_to_me(update, context):
     user_text = update.message.text
@@ -28,6 +33,7 @@ def main():
     # Добавляю диспетчера события "start" и обработчика текста
     dp = mybot.dispatcher
     dp.add_handler(CommandHandler('start', greet_user))
+    dp.add_handler(CommandHandler('planet', show_star))
     dp.add_handler(MessageHandler(Filters.text, talk_to_me))
 
     logging.info('Бот стартовал')
