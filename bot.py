@@ -25,7 +25,13 @@ def show_star(update, context):
         update.message.reply_text('Введите название планеты') 
         return
 
-    planet = getattr(ephem, planet_name)
+    try:
+        planet = getattr(ephem, planet_name)
+    except AttributeError:
+        logging.error('В команду /planet введена неверное имя планеты')
+        update.message.reply_text('Введите верное имя планеты') 
+        return
+
     star_date = str(datetime.date.today())
     star = ephem.constellation(planet(star_date))
     star_reply = 'Планета ' + planet_name + ' находится в созвездии ' + star[1]
