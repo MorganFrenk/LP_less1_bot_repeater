@@ -22,7 +22,7 @@ def show_star(update, context):
         body_name = update.message.text.split()[1].title()
     except IndexError:
         logging.error('В команду /star не введено небесное тело')
-        update.message.reply_text('Введите название планеты') 
+        update.message.reply_text('Введите название небесного тела') 
         return
 
     try:
