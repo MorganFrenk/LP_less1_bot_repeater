@@ -1,11 +1,12 @@
-import logging
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+import logging, datetime
 import settings
 import ephem
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 
 # Телеграм-бот который повторяет все что ему отправили
 
 logging.basicConfig(level=logging.INFO)
+
 
 def greet_user(update, context):
     logging.info('Команда /start активирована')
@@ -14,9 +15,24 @@ def greet_user(update, context):
     update.message.reply_text(start_reply) 
     logging.info('Ответ бота на /start: ' + start_reply)
 
+
 def show_star(update, context):
     logging.info('Команда /planet активирована')
-    planet = update.message.text.split()
+    try:
+        planet_name = update.message.text.split()[1].title()
+    except IndexError:
+        logging.error('В команду /planet не введена планета')
+        update.message.reply_text('Введите название планеты') 
+        return
+
+    planet = getattr(ephem, planet_name)
+    star_date = str(datetime.date.today())
+    star = ephem.constellation(planet(star_date))
+    star_reply = 'Планета ' + planet_name + ' находится в созвездии ' + star[1]
+    
+    logging.info(star_reply)
+    update.message.reply_text(star_reply)
+
 
 def talk_to_me(update, context):
     user_text = update.message.text
@@ -25,6 +41,7 @@ def talk_to_me(update, context):
     standart_reply = 'Сам ты ' + user_text
     update.message.reply_text(standart_reply)
     logging.info('Ответ бота: ' + standart_reply)
+
 
 def main():
     # Создаю бота и передаю ему ключ
