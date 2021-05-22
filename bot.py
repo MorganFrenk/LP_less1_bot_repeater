@@ -22,14 +22,14 @@ def show_star(update, context):
         body_name = update.message.text.split()[1].title()
     except IndexError:
         logging.error('В команду /star не введено небесное тело')
-        update.message.reply_text('Введите название небесного тела') 
+        update.message.reply_text('Введите название небесного тела (/star "имя небесного тела")') 
         return
 
     try:
         body = getattr(ephem, body_name)
     except AttributeError:
         logging.error('В команду /star введено неверное имя небесного тела')
-        update.message.reply_text('Введите правильное имя небесного тела') 
+        update.message.reply_text('Введите правильное имя небесного тела (/star "имя небесного тела")') 
         return
 
     star_date = str(datetime.date.today())
