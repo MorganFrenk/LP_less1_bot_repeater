@@ -1,2 +1,4 @@
 # LP_less1_bot_repeater
-Bot repeat all what you send with "Сам ты"
+
+Bot repeats all what you send with "Сам ты"
+Tells which constellation the selected cosmic body is in (/star command)
