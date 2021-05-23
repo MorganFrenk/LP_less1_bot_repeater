@@ -1,4 +1,5 @@
-import logging, datetime
+import datetime
+import logging
 import settings
 import ephem
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
