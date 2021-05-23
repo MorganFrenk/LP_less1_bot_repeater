@@ -36,9 +36,22 @@ def show_star(update, context):
     star = ephem.constellation(body(star_date))
     star_reply = 'Небесное тело ' + body_name + ' находится в созвездии ' + star[1]
     
-    logging.info(star_reply)
+    logging.info('Ответ бота: ' + star_reply)
     update.message.reply_text(star_reply)
 
+def next_full_moon(update, context):
+    logging.info('Команда /next_full_moon активирована')
+    try:
+        date = update.message.text.split()[1]
+    except IndexError:
+        logging.error('В команду /next_full_moon не введена дата')
+        update.message.reply_text('Введите дату (/next_full_moon "дата")') 
+        return
+
+    next_moon = ephem.next_full_moon(date)
+
+    logging.info('Ответ бота: ' + next_moon)
+    update.message.reply_text(next_moon)
 
 def talk_to_me(update, context):
     user_text = update.message.text
@@ -53,10 +66,11 @@ def main():
     # Создаю бота и передаю ему ключ
     mybot = Updater(settings.API_KEY, use_context=True)
     
-    # Добавляю диспетчера события "start" и обработчика текста
+    # Добавляю диспетчера событий. (start, star, next_full_moon, сообщение)
     dp = mybot.dispatcher
     dp.add_handler(CommandHandler('start', greet_user))
     dp.add_handler(CommandHandler('star', show_star))
+    dp.add_handler(CommandHandler('next_full_moon', next_full_moon))
     dp.add_handler(MessageHandler(Filters.text, talk_to_me))
 
     logging.info('Бот стартовал')
