@@ -14,7 +14,7 @@ def greet_user(update, context):
 
     start_reply = 'Здарова!'
     update.message.reply_text(start_reply) 
-    logging.info('Ответ бота на /start: ' + start_reply)
+    logging.info(f'Ответ бота на /start: {start_reply}')
 
 
 def show_star(update, context):
@@ -35,32 +35,40 @@ def show_star(update, context):
 
     star_date = str(datetime.date.today())
     star = ephem.constellation(body(star_date))
-    star_reply = 'Небесное тело ' + body_name + ' находится в созвездии ' + star[1]
+    star_reply = f'Небесное тело {body_name} находится в созвездии {star[1]}'
     
-    logging.info('Ответ бота: ' + star_reply)
+    logging.info(f'Ответ бота: {star_reply}')
     update.message.reply_text(star_reply)
 
 def next_full_moon(update, context):
     logging.info('Команда /next_full_moon активирована')
+
     try:
-        date = update.message.text.split()[1]
+        date_str = update.message.text.split()[1]
     except IndexError:
         logging.error('В команду /next_full_moon не введена дата')
-        update.message.reply_text('Введите дату (/next_full_moon "дата")') 
+        update.message.reply_text('Введите дату (/next_full_moon "дата: 2000/01/01")') 
         return
 
-    next_moon = ephem.next_full_moon(date)
+    try:
+        date = datetime.datetime.strptime(date_str, '%Y/%m/%d')
+    except ValueError:
+        logging.error('В команду /next_full_moon введена дата неверного формата')
+        update.message.reply_text('Введите дату формата "2000/01/01"') 
+        return
 
-    logging.info('Ответ бота: ' + next_moon)
-    update.message.reply_text(next_moon)
+    next_moon_date_raw = ephem.next_full_moon(date)
+    next_moon_date = next_moon_date_raw
+    logging.info(f'Ответ бота: {next_moon_date}')
+    update.message.reply_text(f'Дата и время следующего полнолуния: {next_moon_date}')
 
 def talk_to_me(update, context):
     user_text = update.message.text
-    logging.info('Сообщение от пользователя: ' + user_text)
+    logging.info(f'Сообщение от пользователя: {user_text}')
     
-    standart_reply = 'Сам ты ' + user_text
+    standart_reply = f'Сам ты {user_text}' 
     update.message.reply_text(standart_reply)
-    logging.info('Ответ бота: ' + standart_reply)
+    logging.info(f'Ответ бота: {standart_reply}')
 
 
 def main():
