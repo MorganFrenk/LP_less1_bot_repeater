@@ -57,8 +57,7 @@ def next_full_moon(update, context):
         update.message.reply_text('Введите дату формата "2000/01/01"') 
         return
 
-    next_moon_date_raw = ephem.next_full_moon(date)
-    next_moon_date = next_moon_date_raw
+    next_moon_date = ephem.next_full_moon(date)
     logging.info(f'Ответ бота: {next_moon_date}')
     update.message.reply_text(f'Дата и время следующего полнолуния: {next_moon_date}')
 
