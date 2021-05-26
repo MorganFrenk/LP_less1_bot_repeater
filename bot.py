@@ -72,7 +72,7 @@ def talk_to_me(update, context):
 
 def main():
     # Создаю бота и передаю ему ключ
-    mybot = Updater(settings.API_KEY, use_context=True)
+    mybot = Updater(settings.API_KEY_REPEATER, use_context=True)
     
     # Добавляю диспетчера событий. (start, star, next_full_moon, сообщение)
     dp = mybot.dispatcher
