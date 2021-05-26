@@ -25,10 +25,19 @@ def goroda_game(update, context):
     user_gorod = update.message.text
 
     # Экспортирую список всех городов из файла в лист
-    with open('goroda.csv', 'r', encoding='utf8') as f:
-        goroda = list(csv.reader(f))
+    with open('goroda.csv', 'r', encoding='utf-8') as goroda_csv:
+        goroda = list(csv.reader(goroda_csv))
         goroda = [i for subl in goroda for i in subl]
     
+    with open(f'{settings.DATA_DEST}{settings.GORODA_BOT_DATA}', 'r+', encoding='utf-8-sig')\
+        as user_data_scv:
+        fields = ['User_id', 'Pass_towns']
+        reader = csv.DictReader(user_data_scv)
+        writer = csv.DictWriter(user_data_scv)
+
+        for row in reader:
+            print(row['User_id'])
+
 def main():
     # Создаю бота и передаю ему ключ
     mybot = Updater(settings.API_KEY_GORODA, use_context=True)
