@@ -1,5 +1,6 @@
 import logging
 import csv
+import pickle
 import settings
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 
@@ -15,29 +16,43 @@ def greet_user(update, context):
                 'называет реально существующий город ' \
                 'России, название которого начинается на ту букву, ' \
                 'которой оканчивается название предыдущего. \n' \
-                'Начнем? Ты первый.'
+                'Начнем? Ты первый. Просто напиши название города'
 
     update.message.reply_text(start_reply) 
 
 def goroda_game(update, context):
     logging.info('Получено сообщение в goroda_game')
 
-    user_gorod = update.message.text
+    user_gorod_input = update.message.text
+    user_chat_id = update.message.chat_id
+    pass_goroda_dict = {} # Словарь для хранение выбывших городов юзера
 
-    # Экспортирую список всех городов из файла в лист
+    # Экспортирую список всех городов из csv в лист
     with open('goroda.csv', 'r', encoding='utf-8') as goroda_csv:
         goroda = list(csv.reader(goroda_csv))
-        goroda = [i for subl in goroda for i in subl]
+        goroda = [gorod for sublist in goroda for gorod in sublist]
     
-    with open(f'{settings.DATA_DEST}{settings.GORODA_BOT_DATA}', 'r+', encoding='utf-8-sig')\
-        as user_data_scv:
-        fields = ['User_id', 'Pass_towns']
+    try:
+        with open('users_pass_goroda.pickle', 'rb') as pickle_goroda:
+            pass_goroda_dict = pickle.load(pickle_goroda)
 
-        reader = csv.DictReader(user_data_scv)
-        writer = csv.DictWriter(user_data_scv, fields)
+            if user_chat_id not in pass_goroda_dict:
+                pass_goroda_dict[user_chat_id] = [] # Добавляю нового юзера и пустой список городов
+                
+            logging.info(f'Выгрузка выбывших городов из pickle успешна: {pass_goroda_dict}')
 
-        for row in reader:
-            logging.info(row)
+    except FileNotFoundError:
+        with open('users_pass_goroda.pickle', 'wb') as pickle_goroda:
+            logging.info('Нет pickle с выбывшими городами. Создается')
+            pass_goroda_dict[user_chat_id] = []
+            pickle.dump(pass_goroda_dict, pickle_goroda)
+            logging.info(f'Новый pickle записан: {pass_goroda_dict}')
+
+    pass_goroda_dict[user_chat_id].append('Москва')
+
+    with open('users_pass_goroda.pickle', 'wb') as pickle_goroda:
+        pickle.dump(pass_goroda_dict, pickle_goroda)
+        logging.info(f'Pickle записан: {pass_goroda_dict}')
 
 def main():
     # Создаю бота и передаю ему ключ
