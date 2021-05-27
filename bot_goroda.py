@@ -30,7 +30,7 @@ def goroda_game(update, context):
     # Экспортирую список всех городов из csv в лист
     with open('goroda.csv', 'r', encoding='utf-8') as goroda_csv:
         goroda = list(csv.reader(goroda_csv))
-        goroda = [gorod for sublist in goroda for gorod in sublist]
+        goroda = [gor for gorsublist in goroda for gor in gorsublist]
     
     try:
         with open('users_pass_goroda.pickle', 'rb') as pickle_goroda:
@@ -48,7 +48,29 @@ def goroda_game(update, context):
             pickle.dump(pass_goroda_dict, pickle_goroda)
             logging.info(f'Новый pickle записан: {pass_goroda_dict}')
 
-    pass_goroda_dict[user_chat_id].append('Москва')
+    if user_gorod_input not in goroda:
+        logging.info(f'Город некорректный: {user_gorod_input}')
+        update.message.reply_text('Нет такого города!') 
+        return
+
+    if user_gorod_input in pass_goroda_dict[user_chat_id]:
+        logging.info('Введенный город юзера выбыл из игры')
+        update.message.reply_text('Этот город уже был!') 
+        return
+
+    logging.info(f'Корректный город юзера: {user_gorod_input}')
+    pass_goroda_dict[user_chat_id].append(user_gorod_input) # Добавляю корректный город юзера в выбывшие
+
+    for gorod in goroda:
+        if gorod[0].lower() == user_gorod_input[-1] and gorod not in pass_goroda_dict[user_chat_id]:
+            reply_gorod = gorod
+            update.message.reply_text(reply_gorod) 
+            logging.info(f'Ответ бота: {reply_gorod}')
+            pass_goroda_dict[user_chat_id].append(reply_gorod) # Добавляю город бота в выбывшие
+            break
+
+
+    
 
     with open('users_pass_goroda.pickle', 'wb') as pickle_goroda:
         pickle.dump(pass_goroda_dict, pickle_goroda)
@@ -58,12 +80,13 @@ def main():
     # Создаю бота и передаю ему ключ
     mybot = Updater(settings.API_KEY_GORODA, use_context=True)
     
-    # Добавляю диспетчера событий. (старт, сообщение)
+    # Добавляю диспетчера событий. (старт, сообщение с городом)
     dp = mybot.dispatcher
     dp.add_handler(CommandHandler('start', greet_user))
     dp.add_handler(MessageHandler(Filters.text, goroda_game))
 
     logging.info('Бот стартовал')
+
     # Начинаю отправку запросов
     mybot.start_polling()
     
