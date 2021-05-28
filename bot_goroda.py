@@ -25,56 +25,69 @@ def goroda_game(update, context):
 
     user_gorod_input = update.message.text
     user_chat_id = update.message.chat_id
-    pass_goroda_dict = {} # Словарь для хранение выбывших городов юзера
+    user_data_dict = {} # Словарь для хранение выбывших городов юзера и предыдущего города бота
+    pass_goroda = []
+    bot_prev_gorod = ''
 
     # Экспортирую список всех городов из csv в лист
     with open('goroda.csv', 'r', encoding='utf-8') as goroda_csv:
         goroda = list(csv.reader(goroda_csv))
         goroda = [gor for gorsublist in goroda for gor in gorsublist]
     
+    # Обработик для pickle в котором хранится дата юзера
     try:
         with open('users_pass_goroda.pickle', 'rb') as pickle_goroda:
-            pass_goroda_dict = pickle.load(pickle_goroda)
+            user_data_dict = pickle.load(pickle_goroda)
 
-            if user_chat_id not in pass_goroda_dict:
-                pass_goroda_dict[user_chat_id] = [] # Добавляю нового юзера и пустой список городов
-                
-            logging.info(f'Выгрузка выбывших городов из pickle успешна: {pass_goroda_dict}')
+            if user_chat_id not in user_data_dict:
+                user_data_dict[user_chat_id] = {}            
+            
+            bot_prev_gorod = user_data_dict[user_chat_id]['prev_bot_gorod']
+            pass_goroda = user_data_dict[user_chat_id]['pass_goroda']
+
+            logging.info(f'Выгрузка выбывших городов из pickle успешна: {user_data_dict}')
 
     except FileNotFoundError:
-        with open('users_pass_goroda.pickle', 'wb') as pickle_goroda:
-            logging.info('Нет pickle с выбывшими городами. Создается')
-            pass_goroda_dict[user_chat_id] = []
-            pickle.dump(pass_goroda_dict, pickle_goroda)
-            logging.info(f'Новый pickle записан: {pass_goroda_dict}')
+        logging.info('Нет pickle с выбывшими городами')
+        pass
 
     if user_gorod_input not in goroda:
-        logging.info(f'Город некорректный: {user_gorod_input}')
+        logging.info(f'Город юзера некорректный: {user_gorod_input}')
         update.message.reply_text('Нет такого города!') 
         return
 
-    if user_gorod_input in pass_goroda_dict[user_chat_id]:
+    if user_gorod_input in pass_goroda:
         logging.info('Введенный город юзера выбыл из игры')
         update.message.reply_text('Этот город уже был!') 
         return
 
+    if user_data_dict:
+        if user_gorod_input[0].lower() != bot_prev_gorod[-1]:
+            logging.info('Введенный город юзера противоречит правилам')
+            update.message.reply_text('Этот город не подходит!') 
+            return
+
     logging.info(f'Корректный город юзера: {user_gorod_input}')
-    pass_goroda_dict[user_chat_id].append(user_gorod_input) # Добавляю корректный город юзера в выбывшие
+    pass_goroda.append(user_gorod_input)
 
     for gorod in goroda:
-        if gorod[0].lower() == user_gorod_input[-1] and gorod not in pass_goroda_dict[user_chat_id]:
-            reply_gorod = gorod
-            update.message.reply_text(reply_gorod) 
-            logging.info(f'Ответ бота: {reply_gorod}')
-            pass_goroda_dict[user_chat_id].append(reply_gorod) # Добавляю город бота в выбывшие
+        if gorod[0].lower() == user_gorod_input[-1] and gorod not in pass_goroda:
+            bot_gorod = gorod
+            update.message.reply_text(bot_gorod) 
+            logging.info(f'Ответ бота: {bot_gorod}')
+
+            pass_goroda.append(bot_gorod)
+            bot_prev_gorod = bot_gorod[-1]
             break
 
-
-    
-
+    # Сохраняю юзер дату в pickle
     with open('users_pass_goroda.pickle', 'wb') as pickle_goroda:
-        pickle.dump(pass_goroda_dict, pickle_goroda)
-        logging.info(f'Pickle записан: {pass_goroda_dict}')
+        user_data_dict[user_chat_id] = {}
+        user_data_dict[user_chat_id]['pass_goroda'] = pass_goroda
+        user_data_dict[user_chat_id]['prev_bot_gorod'] = bot_gorod
+
+        pickle.dump(user_data_dict, pickle_goroda)
+        logging.info(f'Pickle записан: {user_data_dict}')
 
 def main():
     # Создаю бота и передаю ему ключ
