@@ -25,16 +25,20 @@ def goroda_game(update, context):
 
     user_gorod_input = update.message.text
     user_chat_id = update.message.chat_id
-    user_data_dict = {} # Словарь для хранение выбывших городов юзера и предыдущего города бота
+
+    # Пустой словарь с юзер дата и вложения
+    user_data_dict = {} 
     pass_goroda = []
     bot_prev_gorod = ''
+    
+    wrong_letters = ['ь','ъ']
 
     # Экспортирую список всех городов из csv в лист
     with open('goroda.csv', 'r', encoding='utf-8') as goroda_csv:
         goroda = list(csv.reader(goroda_csv))
         goroda = [gor for gorsublist in goroda for gor in gorsublist]
     
-    # Обработик для pickle в котором хранится дата юзера
+    # Загружаю pickle с юзер датой и выгружаю ее
     try:
         with open('users_pass_goroda.pickle', 'rb') as pickle_goroda:
             user_data_dict = pickle.load(pickle_goroda)
@@ -70,14 +74,29 @@ def goroda_game(update, context):
     logging.info(f'Корректный город юзера: {user_gorod_input}')
     pass_goroda.append(user_gorod_input)
 
+    user_gorod_input_l_let = user_gorod_input[-1]
+
+    # Если город юзера оканчивается на букву ь или ъ, выбираем предпоследнюю букву для игры
+    if user_gorod_input[-1] in wrong_letters:
+        user_gorod_input_l_let = user_gorod_input[-2]
+        logging.info(f'Последняя буква города юзера {user_gorod_input} некорректная')
+
+    logging.info(f'Последняя буква города юзера {user_gorod_input_l_let}')
+
     for gorod in goroda:
-        if gorod[0].lower() == user_gorod_input[-1] and gorod not in pass_goroda:
+        if gorod[0].lower() == user_gorod_input_l_let and gorod not in pass_goroda:
             bot_gorod = gorod
+
             update.message.reply_text(bot_gorod) 
             logging.info(f'Ответ бота: {bot_gorod}')
 
             pass_goroda.append(bot_gorod)
-            bot_prev_gorod = bot_gorod[-1]
+            
+            bot_prev_gorod = bot_gorod
+
+            # Если город бота заканчивается на некорректную для игры букву, то обрезаю ее
+            if bot_gorod[-1] in wrong_letters:
+                bot_prev_gorod = bot_gorod.rstrip(bot_gorod[-1])
             break
 
     # Сохраняю юзер дату в pickle
