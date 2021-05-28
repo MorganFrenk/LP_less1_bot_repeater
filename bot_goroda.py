@@ -20,6 +20,14 @@ def greet_user(update, context):
 
     update.message.reply_text(start_reply) 
 
+    # Очищаю юзер дата юзера для новой игры
+    user_chat_id = update.message.chat_id
+    with open('users_pass_goroda.pickle', 'rb') as pickle_goroda:
+            user_data_dict = pickle.load(pickle_goroda)
+    with open('users_pass_goroda.pickle', 'wb') as pickle_goroda:
+            user_data_dict[user_chat_id] = {}
+            pickle.dump(user_data_dict, pickle_goroda)
+
 def goroda_game(update, context):
     logging.info('Получено сообщение в goroda_game')
 
@@ -44,15 +52,17 @@ def goroda_game(update, context):
             user_data_dict = pickle.load(pickle_goroda)
 
             if user_chat_id not in user_data_dict:
-                user_data_dict[user_chat_id] = {}            
-            
-            bot_prev_gorod = user_data_dict[user_chat_id]['prev_bot_gorod']
-            pass_goroda = user_data_dict[user_chat_id]['pass_goroda']
+                user_data_dict[user_chat_id] = {} 
+
+            else:
+                bot_prev_gorod = user_data_dict[user_chat_id]['prev_bot_gorod']
+                pass_goroda = user_data_dict[user_chat_id]['pass_goroda']
 
             logging.info(f'Выгрузка выбывших городов из pickle успешна: {user_data_dict}')
 
     except FileNotFoundError:
         logging.info('Нет pickle с выбывшими городами')
+        user_data_dict[user_chat_id] = {} 
         pass
 
     if user_gorod_input not in goroda:
@@ -65,7 +75,7 @@ def goroda_game(update, context):
         update.message.reply_text('Этот город уже был!') 
         return
 
-    if user_data_dict:
+    if user_data_dict[user_chat_id]:
         if user_gorod_input[0].lower() != bot_prev_gorod[-1]:
             logging.info('Введенный город юзера противоречит правилам')
             update.message.reply_text('Этот город не подходит!') 
@@ -94,12 +104,12 @@ def goroda_game(update, context):
             
             # Если город бота заканчивается на некорректную для игры букву, то обрезаю ее
             if bot_gorod[-1] in wrong_letters:
+                logging.info(f'Последняя буква города бота {bot_gorod} некорректа. Принимается как {bot_gorod[-2]}')
                 bot_gorod = bot_gorod.rstrip(bot_gorod[-1])
             break
 
     # Сохраняю юзер дату в pickle
     with open('users_pass_goroda.pickle', 'wb') as pickle_goroda:
-        user_data_dict[user_chat_id] = {}
         user_data_dict[user_chat_id]['pass_goroda'] = pass_goroda
         user_data_dict[user_chat_id]['prev_bot_gorod'] = bot_gorod
 
