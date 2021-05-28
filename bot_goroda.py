@@ -16,17 +16,23 @@ def greet_user(update, context):
                 'называет реально существующий город ' \
                 'России, название которого начинается на ту букву, ' \
                 'которой оканчивается название предыдущего. \n' \
-                'Начнем? Ты первый. Просто напиши название города'
+                'Начнем? Ты первый. Просто напиши название города.'
 
     update.message.reply_text(start_reply) 
 
     # Очищаю юзер дата юзера для новой игры
     user_chat_id = update.message.chat_id
-    with open('users_pass_goroda.pickle', 'rb') as pickle_goroda:
-            user_data_dict = pickle.load(pickle_goroda)
-    with open('users_pass_goroda.pickle', 'wb') as pickle_goroda:
-            user_data_dict[user_chat_id] = {}
-            pickle.dump(user_data_dict, pickle_goroda)
+    try:
+        with open('users_pass_goroda.pickle', 'rb') as pickle_goroda:
+                user_data_dict = pickle.load(pickle_goroda)
+        with open('users_pass_goroda.pickle', 'wb') as pickle_goroda:
+                user_data_dict[user_chat_id] = {}
+                pickle.dump(user_data_dict, pickle_goroda)
+        
+        logging.info('Pickle очищен')
+
+    except FileNotFoundError:
+        return
 
 def goroda_game(update, context):
     logging.info('Получено сообщение в goroda_game')
@@ -51,17 +57,19 @@ def goroda_game(update, context):
         with open('users_pass_goroda.pickle', 'rb') as pickle_goroda:
             user_data_dict = pickle.load(pickle_goroda)
 
-            if user_chat_id not in user_data_dict:
-                user_data_dict[user_chat_id] = {} 
+            try:
+                if user_chat_id not in user_data_dict:
+                    user_data_dict[user_chat_id] = {} 
 
-            else:
-                bot_prev_gorod = user_data_dict[user_chat_id]['prev_bot_gorod']
-                pass_goroda = user_data_dict[user_chat_id]['pass_goroda']
-
-            logging.info(f'Выгрузка выбывших городов из pickle успешна: {user_data_dict}')
-
+                else:
+                    bot_prev_gorod = user_data_dict[user_chat_id]['prev_bot_gorod']
+                    pass_goroda = user_data_dict[user_chat_id]['pass_goroda']
+                    logging.info(f'Выгрузка выбывших городов из pickle успешна: {user_data_dict}')
+            except KeyError:
+                    pass
+            
     except FileNotFoundError:
-        logging.info('Нет pickle с выбывшими городами')
+        logging.info('Нет pickle с юзер дата')
         user_data_dict[user_chat_id] = {} 
         pass
 
