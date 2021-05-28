@@ -92,11 +92,9 @@ def goroda_game(update, context):
 
             pass_goroda.append(bot_gorod)
             
-            bot_prev_gorod = bot_gorod
-
             # Если город бота заканчивается на некорректную для игры букву, то обрезаю ее
             if bot_gorod[-1] in wrong_letters:
-                bot_prev_gorod = bot_gorod.rstrip(bot_gorod[-1])
+                bot_gorod = bot_gorod.rstrip(bot_gorod[-1])
             break
 
     # Сохраняю юзер дату в pickle
