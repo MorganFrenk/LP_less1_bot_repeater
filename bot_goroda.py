@@ -26,7 +26,7 @@ def greet_user(update, context):
         with open('users_pass_goroda.pickle', 'rb') as pickle_goroda:
                 user_data_dict = pickle.load(pickle_goroda)
         with open('users_pass_goroda.pickle', 'wb') as pickle_goroda:
-                user_data_dict[user_chat_id] = {}
+                del user_data_dict[user_chat_id]
                 pickle.dump(user_data_dict, pickle_goroda)
         
         logging.info('Pickle очищен')
@@ -45,7 +45,7 @@ def goroda_game(update, context):
     pass_goroda = []
     bot_prev_gorod = ''
     
-    wrong_letters = ['ь','ъ']
+    wrong_letters = ['ь','ъ', 'ы']
 
     # Экспортирую список всех городов из csv в лист
     with open('goroda.csv', 'r', encoding='utf-8') as goroda_csv:
@@ -56,17 +56,12 @@ def goroda_game(update, context):
     try:
         with open('users_pass_goroda.pickle', 'rb') as pickle_goroda:
             user_data_dict = pickle.load(pickle_goroda)
-
-            try:
                 if user_chat_id not in user_data_dict:
                     user_data_dict[user_chat_id] = {} 
-
                 else:
                     bot_prev_gorod = user_data_dict[user_chat_id]['prev_bot_gorod']
                     pass_goroda = user_data_dict[user_chat_id]['pass_goroda']
                     logging.info(f'Выгрузка выбывших городов из pickle успешна: {user_data_dict}')
-            except KeyError:
-                    pass
             
     except FileNotFoundError:
         logging.info('Нет pickle с юзер дата')
@@ -94,7 +89,7 @@ def goroda_game(update, context):
 
     user_gorod_input_l_let = user_gorod_input[-1]
 
-    # Если город юзера оканчивается на букву ь или ъ, выбираем предпоследнюю букву для игры
+    # Если город юзера оканчивается на букву ь, ъ или ы, выбираем предпоследнюю букву для игры
     if user_gorod_input[-1] in wrong_letters:
         user_gorod_input_l_let = user_gorod_input[-2]
         logging.info(f'Последняя буква города юзера {user_gorod_input} некорректная')
