@@ -1,5 +1,12 @@
 # LP_less1_bot_repeater
+Телеграмм-боты созданные в рамках курса LearnPython.
 
-Bot repeats all what you send with "Сам ты"
-Tells which constellation the selected cosmic body is in (/star command)
-Tells next full moon date after user's date (/next_full_moon command)
+--bot.py - Bot repeater--
+На сообщение юзера бот отвечает фразой "Сам ты {сообщение юзера}".
+Команда /star - говорит в каком созвездии находится планета в аргументе в данный момент.
+Команда /next_full_moon  - скажет, когда будет следующее полнолуние от даты указанной в аргументе.
+
+--bot_goroda.py - Bot repeater--
+Бот играет в "города". Команда /start начинает игру заново.
+Для сериализации данных использовал pickle.
+
